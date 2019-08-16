@@ -6,6 +6,7 @@
 package com.quantum.servlet;
 
 import com.google.gson.Gson;
+import com.quantum.dao.ArchivoDAO;
 import com.quantum.modelos.Selectequivalencias;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -76,16 +77,19 @@ public class Equivalencias extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Selectequivalencias> Lstselectequivalencia;
         response.setContentType("text/plain");
+        ArchivoDAO daoarchivo;
         try {
             String inputarray = request.getParameter("json");
             Gson gson = new Gson();
+            daoarchivo = new ArchivoDAO();
 
-            Selectequivalencias[] footballPlayers = gson.fromJson(inputarray,
+            Selectequivalencias[] seleccionados = gson.fromJson(inputarray,
                     Selectequivalencias[].class);
-
-            for (Selectequivalencias footballPlayer : footballPlayers) {
-                System.out.println(footballPlayer);
-            }
+           /* 
+            for (Selectequivalencias select : seleccionados) {
+                System.out.println(footballPlayer.getId() +" - "+ footballPlayer.getCampo());
+            }*/
+            daoarchivo.procesar();
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

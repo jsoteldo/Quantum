@@ -425,9 +425,6 @@
                                     }
 
                                     function enviar() {
-                                        console.log("entrando"+
-                                                JSON.stringify(selecccionados));
-                                        
                                         $.ajax({
                                             type: 'POST',
                                             data: {"json": JSON.stringify(selecccionados)},
@@ -457,7 +454,7 @@
                                                 } else {
 
                                                     for (i = 0; i < selecccionados.length; i++) {
-                                                        if (selecccionados[i].Id === $(e).attr("id")) {
+                                                        if (selecccionados[i].Id === $(e).attr("id").substring(0, $(e).attr("id").indexOf("-"))) {
                                                             bandera = true;
                                                             selecccionados.splice(i, 1);
                                                             selecccionados.push(new relacion($(e).attr("id").substring(0, $(e).attr("id").indexOf("-")), $(e).val()));
@@ -502,6 +499,13 @@
                                                     }
                                                 }
                                                 v_anterior = "";
+                                            } else {
+                                                for (i = 0; i < selecccionados.length; i++) {
+                                                    if (selecccionados[i].Id === $(e).attr("id").substring(0, $(e).attr("id").indexOf("-"))) {
+                                                        selecccionados.splice(i, 1);
+                                                        break;
+                                                    } 
+                                                }
                                             }
                                         }
                                     }

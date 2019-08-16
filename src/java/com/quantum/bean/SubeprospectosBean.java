@@ -1,12 +1,13 @@
 package com.quantum.bean;
 
+import com.quantum.dao.ArchivoDAO;
 import com.quantum.dao.AsesoresDAO;
 import com.quantum.dao.CamposDAO;
 import com.quantum.dao.DistribucionDAO;
 import com.quantum.dao.FbleadsDAO;
 import com.quantum.dao.GestionDAO;
+import com.quantum.modelos.Archivo;
 import com.quantum.modelos.Asesores;
-import com.quantum.modelos.Campos;
 import com.quantum.modelos.Distribucion;
 import com.quantum.modelos.Gestion;
 import com.quantum.modelos.Mensaje;
@@ -140,16 +141,24 @@ public class SubeprospectosBean {
     public void cargArchivo() throws IOException, Exception {
         FbleadsDAO dao;
         CamposDAO daocampo; 
+        ArchivoDAO daoarchivo;
         Mensaje mensaje;
+        Archivo archivo;
         try (InputStream input = file.getInputStream()) {
             dao = new FbleadsDAO();
             daocampo = new CamposDAO();
+            daoarchivo = new ArchivoDAO();
             String fileName = file.getSubmittedFileName();
             Files.copy(input, new File(folder, fileName).toPath());
             //mensaje = this.manejaArchivoTest(folder + "\\" + fileName);
             this.manejaArchivoTest(folder + "\\" + fileName);
+            
             //message = mensaje;
             this.lstcampos =  daocampo.lstcampos();
+
+            archivo = new Archivo(fileName, fechas.convertirFechaString(new Date(), fechas.FORMATO_FECHA_HORA) , folder + "\\" + fileName, "false");
+            daoarchivo.registrar(archivo);
+            
         } catch (IOException e) {
             message = new Mensaje("", e.getMessage(), "mdi-close-circle-outline", "danger");
             e.printStackTrace();
@@ -210,7 +219,6 @@ public class SubeprospectosBean {
              */
 
             XSSFSheet sheet = workbook.getSheetAt(0);
-
             Iterator<Row> rowIterator = sheet.iterator();
             Row row;
             List<String> cabecera = new ArrayList<String>();
@@ -237,16 +245,7 @@ public class SubeprospectosBean {
                        
             workbook.close();
             
-            for (String consulta : cabecera) {
-                System.out.println(consulta);
-               
-            }
             campos=cabecera;
-            
-            for (String consulta : campos) {
-                System.out.println(consulta);
-               
-            }
             
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage().toString());
@@ -278,8 +277,10 @@ public class SubeprospectosBean {
             Iterator<Row> rowrecorIterator = sheet.iterator();
             Row row;
             List<String> headerArry = new ArrayList<String>();
+            List<String> ArregloCabeceraExcel = new ArrayList<String>();
             List<String> query = new ArrayList<String>();
             StringBuilder headerString = new StringBuilder();
+            StringBuilder CabeceraExcelString = new StringBuilder();
             StringBuilder querys = new StringBuilder();
 
             while (rowIterator.hasNext()) {
@@ -297,6 +298,9 @@ public class SubeprospectosBean {
 
             String headerString2 = "";
             for (int i = 0; i < headerArry.size(); i++) {
+                
+                if()
+                
                 if (i == headerArry.size() - 1) {
                     headerString.append(headerArry.get(i) + ", fecha_insert, repite");
                 } else if (i == 0) {
@@ -306,13 +310,18 @@ public class SubeprospectosBean {
                 }
                 headerString2 = headerString.toString();
             }
-
-            if(headerArry.size() > 20 ){
-                System.out.println("chatbot");
-            }else{
-                System.out.println("facebook");
-            }
             
+            String cabeceraExcel = "";
+            for (int i = 0; i < ArregloCabeceraExcel.size(); i++) {
+                if (i == ArregloCabeceraExcel.size() - 1) {
+                    CabeceraExcelString.append(ArregloCabeceraExcel.get(i) + ", fecha_insert, repite");
+                } else if (i == 0) {
+                    CabeceraExcelString.append(ArregloCabeceraExcel.get(i) + ", ");
+                } else {
+                    CabeceraExcelString.append(ArregloCabeceraExcel.get(i) + ", ");
+                }
+                cabeceraExcel = CabeceraExcelString.toString();
+            }
             /**
              * ******TEST*********
              */
