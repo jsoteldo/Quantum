@@ -22,8 +22,8 @@ public class FbleadsDAO extends DAO {
         Mensaje validoregistrro;
         try {
             this.Conectar();
-            /*PreparedStatement declaracion = this.getConexion().prepareStatement("insert into fbleads (" + campos + ") values " + query.toString());
-            declaracion.executeUpdate();*/
+            PreparedStatement declaracion = this.getConexion().prepareStatement("insert into fbleads (" + campos + ") values " + query.toString());
+            declaracion.executeUpdate();
             //declaracion.executeQuery(query.toString());
             validoregistrro = new Mensaje("", "Prospectos Insertados.", "mdi-checkbox-marked-circle-outline", "success");
             return validoregistrro;

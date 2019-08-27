@@ -368,7 +368,7 @@
                                         if (lista.length !== 0) {
                                             lista.forEach(recorrecampos);
                                             $(".registros").after('<div class="row"> <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">' +
-                                                    '<button type="button" class="btn btn-default float-right" onclick="procesar()">Procesar</button></div>');
+                                                    '<button type="button " class="btn btn-default float-right" onclick="procesar()">Procesar</button></div>');
 
                                         }
                                     });
@@ -425,22 +425,17 @@
                                     }
 
                                     function enviar() {
-                                        selecccionados.sort(function (a, b) {
-                                            return (a.posicion - b.posicion);
-                                        });
-                                        console.log(JSON.stringify(selecccionados));
                                         $.ajax({
                                             type: 'POST',
                                             data: {"json": JSON.stringify(selecccionados)},
                                             dataType: 'json',
                                             url: '../Equivalencias',
                                             success: function (result) {
-                                                $(".registros").hide();
+                                                console.log(result);
                                             },
-                                            error: function (error) {
-                                                console.log(Object.values(error));
-                                                $(".registros").hide();
-                                                
+                                            error: function (xhr, status, error) {
+                                                var err = eval("(" + xhr.responseText + ")");
+                                                alert(err.Message);
                                             }
                                         });
                                     }
@@ -452,34 +447,34 @@
 
 
                                         if (v_anterior !== $(e).val()) {
+                                           if ($(e).val() !== 'IGNORAR') {
+                                                if (selecccionados.length === 0) {
+                                                    selecccionados.push(new relacion($(e).attr("id").substring(0, $(e).attr("id").indexOf("-")), $(e).val()));
 
-                                            if (selecccionados.length === 0) {
-                                                selecccionados.push(new relacion($(e).attr("id").substring($(e).attr("id").indexOf("-") + 1, $(e).attr("id").length), $(e).attr("id").substring(0, $(e).attr("id").indexOf("-")), $(e).val()));
+                                                } else {
 
-                                            } else {
+                                                    for (i = 0; i < selecccionados.length; i++) {
+                                                        if (selecccionados[i].Id === $(e).attr("id").substring(0, $(e).attr("id").indexOf("-"))) {
+                                                            bandera = true;
+                                                            selecccionados.splice(i, 1);
+                                                            selecccionados.push(new relacion($(e).attr("id").substring(0, $(e).attr("id").indexOf("-")), $(e).val()));
+                                                            break;
+                                                        } else {
+                                                            bandera = false;
+                                                        }
+                                                    }
 
-                                                for (i = 0; i < selecccionados.length; i++) {
-                                                    if (selecccionados[i].Id === $(e).attr("id").substring(0, $(e).attr("id").indexOf("-"))) {
-                                                        bandera = true;
-                                                        selecccionados.splice(i, 1);
-                                                        selecccionados.push(new relacion($(e).attr("id").substring($(e).attr("id").indexOf("-") + 1, $(e).attr("id").length), $(e).attr("id").substring(0, $(e).attr("id").indexOf("-")), $(e).val()));
-                                                        break;
-                                                    } else {
-                                                        bandera = false;
+                                                    if (bandera === false) {
+                                                        selecccionados.push(new relacion($(e).attr("id").substring(0, $(e).attr("id").indexOf("-")), $(e).val()));
                                                     }
                                                 }
 
-                                                if (bandera === false) {
-                                                    selecccionados.push(new relacion($(e).attr("id").substring($(e).attr("id").indexOf("-") + 1, $(e).attr("id").length), $(e).attr("id").substring(0, $(e).attr("id").indexOf("-")), $(e).val()));
-                                                }
-                                            }
 
 
 
+                                                var selects = $(".registros select");
+                                                // document.getElementsByTagName(".registros select");
 
-                                            var selects = $(".registros select");
-                                            // document.getElementsByTagName(".registros select");
-                                            if ($(e).val() !== 'IGNORAR') {
                                                 for (var i = 0; i < selects.length; i++) {
                                                     if (selects[i].id !== $(e).attr("id")) {
 
@@ -489,13 +484,12 @@
                                                                 selects[i].remove(j);
 
 
-                                                                if (v_anterior !== null ) {
-                                                                    if (v_anterior !== 'IGNORAR') {
-                                                                        option = document.createElement("option");
-                                                                        option.value = v_anterior;
-                                                                        option.text = v_anterior;
-                                                                        selects[i].appendChild(option);
-                                                                    }
+                                                                if (v_anterior !== null) {
+                                                                    option = document.createElement("option");
+                                                                    option.value = v_anterior;
+                                                                    option.text = v_anterior;
+                                                                    selects[i].appendChild(option);
+
                                                                 }
 
 
@@ -505,13 +499,19 @@
                                                     }
                                                 }
                                                 v_anterior = "";
+                                           } else {
+                                                for (i = 0; i < selecccionados.length; i++) {
+                                                    if (selecccionados[i].Id === $(e).attr("id").substring(0, $(e).attr("id").indexOf("-"))) {
+                                                        selecccionados.splice(i, 1);
+                                                        break;
+                                                    } 
+                                                }
                                             }
                                         }
                                     }
 
 
-                                    function relacion(posicion, id, campo) {
-                                        this.posicion = posicion;
+                                    function relacion(id, campo) {
                                         this.Id = id;
                                         this.Campo = campo;
 

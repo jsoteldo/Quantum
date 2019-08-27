@@ -6,10 +6,13 @@
 package com.quantum.servlet;
 
 import com.google.gson.Gson;
+import com.quantum.bean.SubeprospectosBean;
 import com.quantum.dao.ArchivoDAO;
+import com.quantum.modelos.Archivo;
 import com.quantum.modelos.Selectequivalencias;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -75,7 +78,7 @@ public class Equivalencias extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Selectequivalencias> Lstselectequivalencia;
+        List<Selectequivalencias> Lstselectequivalencia = null;
         response.setContentType("text/plain");
         ArchivoDAO daoarchivo;
         try {
@@ -85,11 +88,18 @@ public class Equivalencias extends HttpServlet {
 
             Selectequivalencias[] seleccionados = gson.fromJson(inputarray,
                     Selectequivalencias[].class);
-           /* 
-            for (Selectequivalencias select : seleccionados) {
-                System.out.println(footballPlayer.getId() +" - "+ footballPlayer.getCampo());
-            }*/
+
+            Lstselectequivalencia = Arrays.asList(seleccionados);
+            for (Selectequivalencias select : Lstselectequivalencia) {
+                System.out.println(select);
+            }
+
+            Archivo arch = daoarchivo.consultaarchivo();
+            SubeprospectosBean enviarchivo = new SubeprospectosBean();
+            enviarchivo.procesaArchivo(arch.getDir(), Lstselectequivalencia);
             daoarchivo.procesar();
+            PrintWriter out = response.getWriter();
+            out.print("Hello ");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -98,18 +108,7 @@ public class Equivalencias extends HttpServlet {
         /* Object obj = JSONValue.parse(data);
         JSONArray array = (JSONArray) obj;
         System.out.println(array);
-         */ PrintWriter out = response.getWriter();
-        out.print("Hello");
+         */
     }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
 
 }

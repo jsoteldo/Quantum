@@ -7,6 +7,8 @@ package com.quantum.modelos;
  */
 public class Selectequivalencias {
     
+    private int posicion;
+    
     private String Id;
     
     private String Campo;
@@ -14,6 +16,14 @@ public class Selectequivalencias {
     
 
     public Selectequivalencias() {
+    }
+
+    public int getPosicion() {
+        return posicion;
+    }
+
+    public void setPosicion(int posicion) {
+        this.posicion = posicion;
     }
 
     public String getId() {
@@ -32,7 +42,8 @@ public class Selectequivalencias {
         this.Campo = Campo;
     }
 
-    public Selectequivalencias(String Id, String Campo) {
+    public Selectequivalencias(int Posicion, String Id, String Campo) {
+        this.posicion = Posicion;
         this.Id = Id;
         this.Campo = Campo;
     }

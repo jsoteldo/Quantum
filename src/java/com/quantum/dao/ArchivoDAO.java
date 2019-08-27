@@ -34,31 +34,30 @@ public class ArchivoDAO extends DAO {
 
     }
 
-    
-
-    public Archivo consultaanuncio(String idanuncio) throws Exception {
-        Archivo anuncioconsultado = new Archivo();;
+    public Archivo consultaarchivo() throws Exception {
         ResultSet resultado;
         try {
             this.Conectar();
             PreparedStatement declaracion = this.getConexion().prepareStatement(""
                     + "SELECT NAME, DIR, FECHA, PROCESADO FROM ARCHIVO "
-                    + "WHERE FECHA = ?");
-            declaracion.setString(1, idanuncio);
-
+                    + "WHERE FECHA in (SELECT MAX(STR_TO_DATE(FECHA,'%Y-%m-%d %H:%i:%s')) FROM ARCHIVO )");
             resultado = declaracion.executeQuery();
+            Archivo arch = new Archivo();
             while (resultado.next()) {
-                anuncioconsultado.setName(resultado.getString("NAME"));
-                anuncioconsultado.setDir(resultado.getString("DIR"));
-                anuncioconsultado.setFecha(resultado.getString("FECHA"));
+
+                arch.setName(resultado.getString("NAME"));
+                arch.setDir(resultado.getString("DIR"));
+                arch.setFecha(resultado.getString("FECHA"));
+                arch.setProcesado(resultado.getString("PROCESADO"));
             }
 
+            return arch;
         } catch (Exception e) {
             throw e;
         } finally {
             this.Cancelar();
         }
-        return anuncioconsultado;
+
     }
 
     public void borrar(Archivo archivo) throws Exception {
@@ -97,5 +96,4 @@ public class ArchivoDAO extends DAO {
         }
     }
 
-    
 }
