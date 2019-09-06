@@ -17,15 +17,14 @@ import java.util.logging.Logger;
 public class FbleadsDAO extends DAO {
 
     public Mensaje registrar(String campos, StringBuilder query) throws Exception {
-        
-        System.out.println("insert into fbleads (" + campos + ") values " + query.toString());
+
         Mensaje validoregistrro;
         try {
             this.Conectar();
             PreparedStatement declaracion = this.getConexion().prepareStatement("insert into fbleads (" + campos + ") values " + query.toString());
             declaracion.executeUpdate();
             //declaracion.executeQuery(query.toString());
-            validoregistrro = new Mensaje("", "Prospectos Insertados.", "mdi-checkbox-marked-circle-outline", "success");
+            validoregistrro = new Mensaje("", "Leads Insertados.", "mdi-checkbox-marked-circle-outline", "success");
             return validoregistrro;
         } catch (Exception e) {
             validoregistrro = new Mensaje("", e.getMessage(), "mdi-close-circle-outline", "danger");
@@ -52,16 +51,16 @@ public class FbleadsDAO extends DAO {
             Logger.getLogger(FbleadsDAO.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(FbleadsDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }finally {
+        } finally {
             this.Cancelar();
         }
 
     }
 
-    public void anunciosfaltantes() throws Exception {
+    public Mensaje anunciosfaltantes() throws Exception {
         List<String> lista;
         ResultSet resultado;
-
+        Mensaje mensaje = null;
         try {
             this.Conectar();
             PreparedStatement declaracion = this.getConexion().prepareStatement(""
@@ -73,37 +72,58 @@ public class FbleadsDAO extends DAO {
             while (resultado.next()) {
                 lista.add(resultado.getString("ad_name"));
             }
+            if (lista.size() > 0) {
+                mensaje = this.insertanuncios(lista);
 
-            this.insertanuncios(lista);
-
-        } catch (SQLException ex) {
-            Logger.getLogger(FbleadsDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(FbleadsDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }finally {
-            this.Cancelar();
-        }
-    }
-
-    public void insertanuncios(List<String> codigosanuncios) {
-        try {
-            PreparedStatement declaracion = this.getConexion().prepareStatement("insert into anuncios (codigo, descripcion) values (?,?)");
-
-            for (String codigo : codigosanuncios) {
-                declaracion.setString(1, codigo);
-                declaracion.setString(2, codigo);
-                declaracion.executeUpdate();
+            } else {
+                mensaje = new Mensaje("", "No hay anuncios nuevos.", "mdi-checkbox-marked-circle-outline", "success");
             }
 
+            
+
         } catch (SQLException ex) {
-            Logger.getLogger(FbleadsDAO.class.getName()).log(Level.SEVERE, null, ex);
+            mensaje = new Mensaje("", ex.getMessage(), "mdi-close-circle-outline", "danger");
+            return mensaje;
+        } catch (Exception ex) {
+            mensaje = new Mensaje("", ex.getMessage(), "mdi-close-circle-outline", "danger");
+            return mensaje;
+        } finally {
+            this.Cancelar();
         }
+        return mensaje;
     }
 
-    public void conjuntosfaltantes() {
+    public Mensaje insertanuncios(List<String> codigosanuncios) {
+        Mensaje mensaje = null;
+        try {
+            PreparedStatement declaracion = this.getConexion().prepareStatement("insert into anuncios (codigo, descripcion) values (?,?)");
+            int contador = 0;
+            for (String codigo : codigosanuncios) {
+                if (!codigo.equals(" ") || !codigo.equals("") || !codigo.equals(null)) {
+                    declaracion.setString(1, codigo);
+                    declaracion.setString(2, codigo);
+                    declaracion.executeUpdate();
+                    contador++;
+                }
+            }
+            if(contador==0){
+                mensaje = new Mensaje("", "No hay anuncios nuevos.", "mdi-checkbox-marked-circle-outline", "success");
+            }else{
+                mensaje = new Mensaje("", "Se insertaron <b>" + contador + "</b> anuncios.", "mdi-checkbox-marked-circle-outline", "success");
+            }
+            
+
+        } catch (SQLException ex) {
+            mensaje = new Mensaje("", ex.getMessage(), "mdi-close-circle-outline", "danger");
+
+        }
+        return mensaje;
+    }
+
+    public Mensaje conjuntosfaltantes() {
         List<String> lista;
         ResultSet resultado;
-
+        Mensaje mensaje = null;
         try {
             this.Conectar();
             PreparedStatement declaracion = this.getConexion().prepareStatement(""
@@ -116,28 +136,47 @@ public class FbleadsDAO extends DAO {
                 lista.add(resultado.getString("adset_name"));
             }
 
-            this.insertaconjuntos(lista);
-
-        } catch (SQLException ex) {
-            Logger.getLogger(FbleadsDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(FbleadsDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public void insertaconjuntos(List<String> idsconjuntos) {
-        try {
-            PreparedStatement declaracion = this.getConexion().prepareStatement("insert into conjuanuncios (id, descripcion) values (?,?)");
-
-            for (String codigo : idsconjuntos) {
-                declaracion.setString(1, codigo);
-                declaracion.setString(2, codigo);
-                declaracion.executeUpdate();
+            if (lista.size() > 0) {
+                mensaje = this.insertaconjuntos(lista);
+            } else {
+                mensaje = new Mensaje("", "No hay conjuntos nuevos.", "mdi-checkbox-marked-circle-outline", "success");
             }
 
         } catch (SQLException ex) {
-            Logger.getLogger(FbleadsDAO.class.getName()).log(Level.SEVERE, null, ex);
+            mensaje = new Mensaje("", ex.getMessage(), "mdi-close-circle-outline", "danger");
+        } catch (Exception ex) {
+            mensaje = new Mensaje("", ex.getMessage(), "mdi-close-circle-outline", "danger");
         }
+        return mensaje;
+    }
+
+    public Mensaje insertaconjuntos(List<String> idsconjuntos) {
+        Mensaje mensaje = null;
+        try {
+            PreparedStatement declaracion = this.getConexion().prepareStatement("insert into conjuanuncios (id, descripcion) values (?,?)");
+            int contador = 0;
+            for (String codigo : idsconjuntos) {
+                if (!codigo.equals(" ") || !codigo.equals("") || !codigo.equals(null)) {
+                    declaracion.setString(1, codigo);
+                    declaracion.setString(2, codigo);
+                    declaracion.executeUpdate();
+                    contador++;
+                }
+
+            }
+            
+            if(contador==0){
+                mensaje = new Mensaje("", "No hay conjuntos nuevos.", "mdi-checkbox-marked-circle-outline", "success");
+            }else{
+                mensaje = new Mensaje("", "Se insertaron <b>" + contador + "</b> conjuntos.", "mdi-checkbox-marked-circle-outline", "success");
+            }
+            
+            
+
+        } catch (SQLException ex) {
+            mensaje = new Mensaje("", ex.getMessage(), "mdi-close-circle-outline", "danger");
+        }
+        return mensaje;
     }
 
     public Mensaje insertaraprospectos(String fecha) throws Exception {
@@ -157,14 +196,14 @@ public class FbleadsDAO extends DAO {
                     + "and repite = 'FALSE'");
             declaracion.executeUpdate();
             validoinsercion = new Mensaje("", "Prospectos Insertados.", "mdi-checkbox-marked-circle-outline", "success");
-            return validoinsercion;
+
         } catch (Exception e) {
             validoinsercion = new Mensaje("", e.getMessage(), "mdi-close-circle-outline", "danger");
-            return validoinsercion;
+
         } finally {
             this.Cancelar();
         }
-
+        return validoinsercion;
     }
 
     public void validaprospectos(String fecha) throws Exception {
@@ -363,8 +402,7 @@ public class FbleadsDAO extends DAO {
         }
         // return lista;
     }
-    
-    
+
     public void prospectoscargados() throws Exception {
         List<Fbleads> lista;
         ResultSet resultado;
@@ -383,11 +421,11 @@ public class FbleadsDAO extends DAO {
                 solicitantes.setIs_organic("FALSE");
                 lista.add(solicitantes);
             }
-/*
+            /*
             if (!lista.isEmpty()) {
                 this.reiterasolicitudleadstelefono(lista, fecha);
             }
-*/
+             */
         } catch (Exception e) {
             throw e;
         } finally {

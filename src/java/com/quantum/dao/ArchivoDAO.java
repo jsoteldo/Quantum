@@ -82,18 +82,18 @@ public class ArchivoDAO extends DAO {
         try {
             this.Conectar();
             PreparedStatement declaracion = this.getConexion().prepareStatement(""
-                    + "UPDATE ARCHIVO set PROCESADO = ? WHERE FECHA in (SELECT MAX(STR_TO_DATE(FECHA,'%Y-%m-%d %H:%i:%s')) FROM ARCHIVO )");
+                    + "UPDATE ARCHIVO set ARCHIVO.PROCESADO = ? WHERE ARCHIVO.FECHA in (SELECT MAX(STR_TO_DATE(m2.FECHA,'%Y-%m-%d %H:%i:%s')) FROM (select * from ARCHIVO) AS m2 )");
 
             declaracion.setString(1, "true");
             declaracion.executeUpdate();
-            validosesion = new Mensaje("", "Actualizado Exitosamente.", "mdi-checkbox-marked-circle-outline", "success");
-            return validosesion;
+            validosesion = new Mensaje("", "Archivo Procesado.", "mdi-checkbox-marked-circle-outline", "success");
         } catch (Exception e) {
             validosesion = new Mensaje("", e.getMessage(), "mdi-close-circle-outline", "danger");
-            return validosesion;
+            
         } finally {
             this.Cancelar();
         }
+        return validosesion;
     }
 
 }

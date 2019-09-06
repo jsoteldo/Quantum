@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -245,10 +246,10 @@ public class SubeprospectosBean {
         }
     }
 
-    public void procesaArchivo(String archivo, List<Selectequivalencias> Lstselectequivalencia) throws Exception {
+    public Mensaje procesaArchivo(String archivo, List<Selectequivalencias> Lstselectequivalencia) throws Exception {
         FbleadsDAO dao;
-        Mensaje mensaje;
-        
+        Mensaje mensaje = null;
+
         try {
             dao = new FbleadsDAO();
             SimpleDateFormat sd2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -270,7 +271,7 @@ public class SubeprospectosBean {
             List<String> query = new ArrayList<String>();
             StringBuilder headerString = new StringBuilder();
             StringBuilder querys = new StringBuilder();
-            
+
             while (rowIterator.hasNext()) {
                 row = rowIterator.next();
                 // Obtenemos el iterator que permite recorres todas las celdas de una fila	
@@ -285,15 +286,14 @@ public class SubeprospectosBean {
                 }
             }
 
-            
             for (int i = 0; i < Lstselectequivalencia.size(); i++) {
                 if (Lstselectequivalencia.get(i).getCampo().equals("IGNORAR")) {
                     posiciones.add(i);
                 }
             }
-            
+
             String headerString2 = "";
-            
+
             if (posiciones != null) {
                 for (int i = 0; i < Lstselectequivalencia.size(); i++) {
                     if (!posiciones.contains(i)) {
@@ -334,11 +334,19 @@ public class SubeprospectosBean {
                             // (Funciona especificando un MissingCellPolicy)
                             Cell cell = fila.getCell(cn, Row.CREATE_NULL_AS_BLANK);
                             if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                                listaFilas.add(sd2.format(cell.getDateCellValue()));
-                            } else {
-                                listaFilas.add(cell.toString());
+                                if (DateUtil.isCellDateFormatted(cell)) {
+                                    listaFilas.add(sd2.format(cell.getDateCellValue()));
+                                } else {
+                                    listaFilas.add(cell.toString().replace("-","").replace("(", "").replace(")", "").replace(" ", "").replace("+", ""));
+                                }
+                            }else if(cell.getCellType() == Cell.CELL_TYPE_STRING){
+                                listaFilas.add(cell.toString().replace("'",""));
+                            }else if(cell.getCellType() == Cell.CELL_TYPE_BLANK){
+                                listaFilas.add("NULL");
+                            }else{
+                                listaFilas.add("NULL");
                             }
-                        }
+                       }
 
                     }
 
@@ -366,35 +374,33 @@ public class SubeprospectosBean {
 
             }
 
-            System.out.println(headerString2);
-
+            
             workbook.close();
 
             for (String consulta : query) {
                 querys.append(consulta);
             }
 
-            System.out.println(querys);
-            mensaje = null;
-            //mensaje = dao.registrar(headerString2, querys);
-            dao.anunciosfaltantes();
-            dao.conjuntosfaltantes();
+            mensaje = dao.registrar(headerString2, querys);
+            
             if (mensaje.getClase().equals("success")) {
-                mensaje = dao.insertaraprospectos(fechas.convertirFechaString(new Date(), fechas.FORMATO_FECHA_HORA_SIN_SEGUNDOS_NI_T));
-            } else {
-                Files.deleteIfExists(Paths.get(archivo));
-                //return mensaje;
-            }
-            //return mensaje;
+                Mensaje msjanuncio = dao.anunciosfaltantes();
+                Mensaje msjconjunto = dao.conjuntosfaltantes();
+                
+                Mensaje msjprospectos = dao.insertaraprospectos(fechas.convertirFechaString(new Date(), fechas.FORMATO_FECHA_HORA_SIN_SEGUNDOS_NI_T));
+                
+                mensaje.setMensaje(mensaje.getMensaje()+ "</br>"+ msjanuncio.getMensaje()+"</br>"+ msjconjunto.getMensaje()+"</br>"+msjprospectos.getMensaje());
+            } 
+            
             Files.deleteIfExists(Paths.get(archivo));
+            
         } catch (FileNotFoundException e) {
-            System.out.println(e.getMessage());
+            mensaje = new Mensaje("",e.getMessage(), "mdi-close-circle-outline", "danger");
+            
         } catch (IOException e) {
-            System.out.println(e.getMessage());
-            mensaje = new Mensaje("", e.toString(), "mdi-close-circle-outline", "danger");
-            e.printStackTrace();
-
+            mensaje = new Mensaje("",e.getMessage(), "mdi-close-circle-outline", "danger");
         }
+        return mensaje;
     }
 
     public Mensaje manejaArchivo(String archivo, List<Selectequivalencias> Lstselectequivalencia) throws Exception {
