@@ -439,7 +439,7 @@
                                                 $("#mensaje").show();
                                                 var clase= "alert-"+msj.clase;
                                                 var text = "text-"+msj.clase;
-                                                $("#mensaje").addClass(clase);
+                                                $("#mensaje").toggleClass(clase);
                                                 $("#mensaje div i").toggleClass(text);
                                                 $("#mensaje div i").toggleClass(msj.ico);
                                                 $("#mensaje div span").html(msj.mensaje);
