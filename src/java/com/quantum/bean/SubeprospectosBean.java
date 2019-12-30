@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -247,6 +248,7 @@ public class SubeprospectosBean {
     }
 
     public Mensaje procesaArchivo(String archivo, List<Selectequivalencias> Lstselectequivalencia) throws Exception {
+        System.out.println("ENTRANDO");
         FbleadsDAO dao;
         Mensaje mensaje = null;
 
@@ -278,7 +280,9 @@ public class SubeprospectosBean {
                 Iterator<Cell> cellIterator = row.cellIterator();
 
                 while (cellIterator.hasNext()) {
+                    
                     Cell cell = cellIterator.next();
+                    
                     if (row.getRowNum() == 0) {
                         headerArry.add(cell.getStringCellValue());
                         ArregloCabeceraExcel.add(cell.getStringCellValue());
@@ -334,13 +338,17 @@ public class SubeprospectosBean {
                             // (Funciona especificando un MissingCellPolicy)
                             Cell cell = fila.getCell(cn, Row.CREATE_NULL_AS_BLANK);
                             if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                System.out.println(cell.getCellType());
+                                System.out.println(cell.toString());
                                 if (DateUtil.isCellDateFormatted(cell)) {
                                     listaFilas.add(sd2.format(cell.getDateCellValue()));
                                 } else {
-                                    listaFilas.add(cell.toString().replace("-","").replace("(", "").replace(")", "").replace(" ", "").replace("+", ""));
+                                    DataFormatter formatter = new DataFormatter();
+                                    String celda = formatter.formatCellValue(cell);
+                                    listaFilas.add(celda.toString().replace("-","").replace("(", "").replace(")", "").replace(" ", "").replace("+", ""));
                                 }
                             }else if(cell.getCellType() == Cell.CELL_TYPE_STRING){
-                                listaFilas.add(cell.toString().replace("'",""));
+                                listaFilas.add(cell.toString().replace("'","").replace("-","").replace("(", "").replace(")", "").replace("+", "").replace("´", "").replace("`", ""));
                             }else if(cell.getCellType() == Cell.CELL_TYPE_BLANK){
                                 listaFilas.add("NULL");
                             }else{

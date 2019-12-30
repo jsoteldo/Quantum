@@ -241,7 +241,8 @@ public class UsuariosBean implements Serializable {
     public void finalSession() throws Exception {
         FacesContext contex = FacesContext.getCurrentInstance();
         contex.getExternalContext().invalidateSession();
-        contex.getExternalContext().redirect(contex.getExternalContext().getApplicationContextPath());
+        contex.getExternalContext().redirect("../Login.xhtml");
+       // contex.getExternalContext().redirect(contex.getExternalContext().getApplicationContextPath());
     }
 
     public void cambiocontrasena() {
